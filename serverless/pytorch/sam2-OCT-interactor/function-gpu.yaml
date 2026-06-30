@@ -1,0 +1,66 @@
+metadata:
+  name: sam2-semantic-gpu
+  namespace: cvat
+  annotations:
+    name: SAM2 (GPU)
+    version: 1
+    type: interactor
+    spec:
+    min_pos_points: 1
+    min_neg_points: 0
+    startswith_box_optional: true
+    animated_gif: ''
+    help_message: >
+      CUDA-accelerated SAM2.
+
+spec:
+  description: Interactive segmentation with SAM2 (CUDA build).
+  runtime: 'python:3.10'
+  handler: main:handler
+  eventTimeout: 60s
+  env:
+    - name: PYTHONPATH
+      value: /opt/nuclio/app/sam2
+    - name: MODEL_PATH
+      value: /opt/nuclio/models
+    - name: NVIDIA_VISIBLE_DEVICES
+      value: all
+    - name: NVIDIA_DRIVER_CAPABILITIES
+      value: compute,utility
+  build:
+    image: cvat.pth.sam2.semantic:gpu
+    baseImage: pytorch/pytorch:2.3.1-cuda12.1-cudnn8-runtime
+    directives:
+      preCopy:
+        - kind: ENV
+          value: DEBIAN_FRONTEND=noninteractive
+        - kind: WORKDIR
+          value: /opt/nuclio/app
+        - kind: RUN
+          value: >
+            apt-get update && apt-get install -y --no-install-recommends
+            git curl ffmpeg libsm6 libxext6 && apt-get clean &&
+            rm -rf /var/lib/apt/lists/*
+        - kind: RUN
+          value: pip install --upgrade pip
+        - kind: RUN
+          value: >
+            pip install numpy Pillow opencv-python-headless
+            hydra-core omegaconf tqdm iopath
+  triggers:
+    http:
+      kind: 'http'
+      workerAvailabilityTimeoutMilliseconds: 10000
+      maxWorkers: 2
+      attributes:
+        maxRequestBodySize: 33554432
+  resources:
+    limits:
+      nvidia.com/gpu: 1
+  platform:
+    attributes:
+      restartPolicy:
+        name: always
+        maximumRetryCount: 3
+      mountMode: volume
+      network: cvat_cvat

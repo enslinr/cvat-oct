@@ -1,0 +1,81 @@
+# Project Specific
+/data/
+/events/
+/share/
+/static/
+/db.sqlite3
+/keys
+/logs
+/profiles
+
+# Ignore temporary files
+# Note: docker-compose.override.yml is tracked - it contains important SAM2 configuration
+__pycache__
+*.pyc
+._*
+.coverage
+.husky/
+.python-version
+/tmp*cvat/
+/temp*/
+
+# Ignore generated test files
+docker-compose.tests.yml
+
+# Ignore npm logs file
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.DS_Store
+
+# Local editor / agent config
+.idea/
+.claude/
+
+#Ignore Cypress tests temp files
+/tests/cypress/fixtures
+/tests/cypress/screenshots
+
+#Ignore helm-related files
+/helm-chart/Chart.lock
+/helm-chart/values.*.yaml
+/helm-chart/charts/*
+
+# Ignore all the installed packages
+node_modules
+# Note: .env.windows, .env.linux, and .env.example are tracked
+# Only the generated .env file is ignored (see bottom of file)
+perfkit.egg-info/
+
+# Ignore all js dists
+cvat-data/dist
+cvat-core/dist
+cvat-canvas/dist
+cvat-canvas3d/dist
+cvat-ui/dist
+
+# produced by prepare in the root package.json script
+.husky
+
+# produced by cvat/apps/iam/rules/tests/generate_tests.py
+/cvat/apps/*/rules/*_test.gen.rego
+
+# produced by allure report
+/**/allure-report*
+/**/allure-results*
+
+# https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
+**/.pnp.*
+**/.yarn/*
+**/!.yarn/patches
+**/!.yarn/plugins
+**/!.yarn/releases
+**/!.yarn/sdks
+**/!.yarn/versions
+
+# Ignore all the model checkpoints
+*.pt
+*.pth
+# Generated .env file (use .env.windows or .env.linux instead)
+.env

@@ -1,0 +1,44 @@
+# This CITATION.cff describes how to cite this fork (CVAT-OCT).
+# Please verify the author and affiliation fields before publishing.
+
+cff-version: 1.2.0
+title: 'CVAT-OCT: AI-assisted segmentation of OCT images (a CVAT fork)'
+message: >-
+  If you use this software, please cite it using the metadata in this file.
+  Please also cite the upstream CVAT and SAM2 projects (see references).
+type: software
+authors:
+  - given-names: Roux
+    family-names: Enslin
+    affiliation: University of the Witwatersrand
+repository-code: 'https://github.com/enslinr/cvat-oct'
+abstract: >-
+  A customized fork of CVAT (Computer Vision Annotation Tool) for interactive,
+  AI-assisted segmentation of retinal Optical Coherence Tomography (OCT) images,
+  using a SAM2-based interactor. Developed as part of an MSc dissertation.
+keywords:
+  - optical-coherence-tomography
+  - medical-image-segmentation
+  - sam2
+  - annotation-tool
+  - computer-vision
+  - deep-learning
+license: MIT
+date-released: '2026-06-30'
+references:
+  - type: software
+    title: Computer Vision Annotation Tool (CVAT)
+    authors:
+      - name: CVAT.ai Corporation
+        email: support+github@cvat.ai
+    repository-code: 'https://github.com/cvat-ai/cvat'
+    url: 'https://cvat.ai/'
+    license: MIT
+    identifiers:
+      - type: doi
+        value: 10.5281/zenodo.4009388
+  - type: software
+    title: 'SAM 2: Segment Anything in Images and Videos'
+    authors:
+      - name: Meta AI
+    repository-code: 'https://github.com/facebookresearch/sam2'

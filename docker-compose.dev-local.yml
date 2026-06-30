@@ -1,0 +1,37 @@
+services:
+  cvat_server:
+    volumes:
+      # Mount Python backend code for live updates (without rebuild)
+      - ./cvat/apps:/home/django/cvat/apps:ro
+
+  cvat_worker_import:
+    volumes:
+      - ./cvat/apps:/home/django/cvat/apps:ro
+
+  cvat_worker_export:
+    volumes:
+      - ./cvat/apps:/home/django/cvat/apps:ro
+
+  cvat_worker_annotation:
+    volumes:
+      - ./cvat/apps:/home/django/cvat/apps:ro
+
+  cvat_worker_webhooks:
+    volumes:
+      - ./cvat/apps:/home/django/cvat/apps:ro
+
+  cvat_worker_quality_reports:
+    volumes:
+      - ./cvat/apps:/home/django/cvat/apps:ro
+
+  cvat_worker_chunks:
+    volumes:
+      - ./cvat/apps:/home/django/cvat/apps:ro
+
+  cvat_worker_utils:
+    volumes:
+      - ./cvat/apps:/home/django/cvat/apps:ro
+
+  cvat_worker_consensus:
+    volumes:
+      - ./cvat/apps:/home/django/cvat/apps:ro

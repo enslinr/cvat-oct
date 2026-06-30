@@ -1,0 +1,72 @@
+metadata:
+  name: sam2-oct
+  namespace: cvat
+  annotations:
+    name: SAM2-OCT
+    version: 2
+    type: interactor
+    spec:
+    min_pos_points: 0
+    min_neg_points: 0
+    startswith_box_optional: true
+    generate_without_prompting_optional: true
+    animated_gif: ''
+    help_message: >
+      Generates masks with SAM2-OCT using positive and negative clicks.
+
+spec:
+  description: Interactive segmentation powered by SAM2-OCT.
+  runtime: 'python:3.10'
+  handler: main:handler
+  eventTimeout: 60s
+  env:
+    - name: PYTHONPATH
+      value: /opt/nuclio/sam2-OCT-interactor
+    - name: MODEL_PATH
+      value: /opt/nuclio/sam2-OCT-interactor
+    - name: SAM2_CONFIG
+      value: "sam2.1/sam2.1_hiera_b+.yaml"
+    - name: SAM2_CHECKPOINT
+      value: "/opt/nuclio/models/sam2.1_hiera_base_plus.pt"
+    - name: SAM2_NUM_CLASSES
+      value: "10"
+    - name: SAM2_TARGET_CLASS
+      value: "1"
+    - name: SAM2_MASK_THRESHOLD
+      value: "0.0"
+    - name: SAM2_NUM_OBJECTS
+      value: "10"
+  build:
+    image: cvat.pth.sam2-oct
+    baseImage: python:3.10-slim
+    directives:
+      preCopy:
+        - kind: ENV
+          value: DEBIAN_FRONTEND=noninteractive
+        - kind: RUN
+          value: >
+            apt-get update && apt-get install -y --no-install-recommends
+            git curl ffmpeg libsm6 libxext6 build-essential python3-dev && apt-get clean &&
+            rm -rf /var/lib/apt/lists/*
+        - kind: WORKDIR
+          value: /opt/nuclio/app
+        - kind: RUN
+          value: pip install --upgrade pip
+        - kind: RUN
+          value: >
+            pip install torch torchvision numpy Pillow opencv-python-headless
+            hydra-core omegaconf tqdm iopath scikit-image
+  triggers:
+    http:
+      kind: 'http'
+      workerAvailabilityTimeoutMilliseconds: 10000
+      maxWorkers: 4
+      attributes:
+        maxRequestBodySize: 33554432
+  platform:
+    attributes:
+      restartPolicy:
+        name: always
+        maximumRetryCount: 3
+      mountMode: volume
+      network: cvat_cvat

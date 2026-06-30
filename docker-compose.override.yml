@@ -1,0 +1,51 @@
+services:
+  nuclio:
+    volumes:
+      # SAM2 function package
+      - ./serverless/pytorch/sam2-interactor:/opt/nuclio/app/sam2-interactor:ro
+      # SAM2 checkpoint directory
+      - ./serverless/pytorch/sam2-interactor/models:/opt/nuclio/sam2/models:ro
+      # SAM2-OCT function package
+      - ./serverless/pytorch/sam2-OCT-interactor:/opt/nuclio/app/sam2-OCT-interactor:ro
+      # SAM2-OCT checkpoint directory
+      - ./serverless/pytorch/sam2-OCT-interactor/models:/opt/nuclio/sam2-oct/models:ro
+      # initialization script
+      - ./serverless/init-nuclio.sh:/docker-entrypoint-initdb.d/init-nuclio.sh:ro
+    environment:
+      - SAM2_CONFIG=sam2.1/sam2.1_hiera_b+.yaml
+      - SAM2_CHECKPOINT=/opt/nuclio/models/sam2.1_hiera_base_plus.pt
+      - SAM2_NUM_CLASSES=3        # adjust if your model exposes more channels
+      - SAM2_TARGET_CLASS=1       # which channel to use for CVAT masks
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8070"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  cvat_server:
+    environment:
+      - CVAT_NUCLIO_HOST=nuclio
+      - CVAT_NUCLIO_INVOKE_METHOD=dashboard
+
+  cvat_worker_annotation:
+    environment:
+      - CVAT_NUCLIO_HOST=nuclio
+      - CVAT_NUCLIO_INVOKE_METHOD=dashboard
+
+  # Helper service to initialize Nuclio after it's ready
+  nuclio_init:
+    image: quay.io/nuclio/dashboard:1.15.9-amd64
+    container_name: nuclio_init
+    depends_on:
+      nuclio:
+        condition: service_healthy
+    volumes:
+      - ./serverless/init-nuclio.sh:/init-nuclio.sh:ro
+      - ./serverless/pytorch/sam2-interactor:/opt/nuclio/app/sam2-interactor:ro
+      - ./serverless/pytorch/sam2-OCT-interactor:/opt/nuclio/app/sam2-OCT-interactor:ro
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+    networks:
+      - cvat
+    command: sh -c "/init-nuclio.sh && sleep infinity"
+    restart: "no"
