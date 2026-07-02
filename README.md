@@ -105,9 +105,15 @@ python -c "from huggingface_hub import hf_hub_download; hf_hub_download('enslinr
 
 ### Selecting a checkpoint
 
-The SAM2-OCT function loads the file named by the `SAM2_CHECKPOINT` environment variable (see `serverless/pytorch/sam2-OCT-interactor/function.yaml` and `docker-compose.override.yml`) — point it at the checkpoint you want to serve.
+Two environment variables in `serverless/pytorch/sam2-OCT-interactor/function.yaml` control which model is served:
 
-> ⚠️ **The class count is currently fixed in code.** `model_handler.py` builds the model with `num_classes = 11` (10 peripapillary layers + background), matching the **MGU** checkpoints. To serve the **NR206** macular checkpoint (8 layers + background = 9 classes), change `num_classes` in [serverless/pytorch/sam2-OCT-interactor/model_handler.py](serverless/pytorch/sam2-OCT-interactor/model_handler.py) from `11` to `9`, otherwise the weights will fail to load with a shape mismatch.
+- **`SAM2_CHECKPOINT`** — path to the checkpoint file to load.
+- **`SAM2_NUM_CLASSES`** — number of classes **including background**; must match the checkpoint, or the weights fail to load with a shape mismatch.
+
+| Checkpoint | `SAM2_NUM_CLASSES` |
+|------------|--------------------|
+| `MGU/`, `MGU_prompted/` (peripapillary — 10 layers + background) | `11` (default) |
+| `NR206/` (macular — 8 layers + background) | `9` |
 
 ## Custom features
 

@@ -29,7 +29,9 @@ spec:
     - name: SAM2_CHECKPOINT
       value: "/opt/nuclio/models/sam2.1_hiera_base_plus.pt"
     - name: SAM2_NUM_CLASSES
-      value: "10"
+      # Classes INCLUDING background, must match SAM2_CHECKPOINT.
+      # 11 = MGU (10 layers + background); use 9 for NR206 (8 layers + background).
+      value: "11"
     - name: SAM2_TARGET_CLASS
       value: "1"
     - name: SAM2_MASK_THRESHOLD

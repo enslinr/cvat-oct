@@ -66,6 +66,12 @@ class ModelHandler:
         self.num_objects = int(os.environ.get("SAM2_NUM_OBJECTS", "9"))
         _log(f"[SAM2] Number of expected objects: {self.num_objects}")
 
+        # Number of output classes the checkpoint was trained with, INCLUDING background.
+        # MGU (peripapillary): 10 layers + background = 11. NR206 (macular): 8 layers + background = 9.
+        # Must match the loaded SAM2_CHECKPOINT, or weight loading fails with a shape mismatch.
+        self.num_classes = int(os.environ.get("SAM2_NUM_CLASSES", "11"))
+        _log(f"[SAM2] Number of classes (incl. background): {self.num_classes}")
+
         # Build standard SAM2 model
         _log("[SAM2] Loading model...")
         _log(f"[SAM2_mine] self.config_name: {str(self.config_name)}")
@@ -74,7 +80,7 @@ class ModelHandler:
 
             hydra_overrides = [
                 "++model._target_=sam2.semantic_sam2.semantic_sam2_components.SAM2Semantic",
-                f"++model.num_classes={11}",  # 10 OCT structures (no background class)
+                f"++model.num_classes={self.num_classes}",  # from SAM2_NUM_CLASSES (incl. background)
                 "++model.num_maskmem=0",
                 "++model.use_mask_input_as_output_without_sam=false",
                 "++model.multimask_output_in_sam=false",
@@ -839,6 +845,7 @@ if __name__ == "__main__":
     os.environ.setdefault("SAM2_DEVICE", "cuda")  # or "cpu" if no GPU
     os.environ.setdefault("SAM2_MASK_THRESHOLD", "0.0")
     os.environ.setdefault("SAM2_NUM_OBJECTS", "10")  # 10 OCT structures (no background)
+    os.environ.setdefault("SAM2_NUM_CLASSES", "11")  # MGU: 10 layers + background
 
     print("Initializing model with local paths...")
     model_handler = ModelHandler()
