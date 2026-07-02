@@ -82,14 +82,32 @@ For active development (frontend rebuilds and serverless hot-reload), use `start
 
 ## Model checkpoints
 
-Model weights are **not** committed to this repository (`*.pt` / `*.pth` are git-ignored). You must provide them locally before starting:
+Model weights are **not** committed to this repository (`*.pt` / `*.pth` are git-ignored). The fine-tuned OCT checkpoints are published on Hugging Face — **[enslinr/sam2-oct](https://huggingface.co/enslinr/sam2-oct)** (CC BY-NC 4.0). See the model card there for training data, evaluation, and limitations.
 
-| Checkpoint | Location | Source |
-|------------|----------|--------|
-| Base SAM2 (`sam2.1_hiera_base_plus.pt`) | `serverless/pytorch/sam2-interactor/models/` and `serverless/pytorch/sam2-OCT-interactor/models/` | [facebookresearch/sam2 releases](https://github.com/facebookresearch/sam2/releases) |
-| Fine-tuned OCT weights (e.g. `MGU/`, `NR206/`) | `serverless/pytorch/sam2-OCT-interactor/models/` | Trained as part of this project; available on request |
+| Checkpoint | Region / task | Location | Source |
+|------------|---------------|----------|--------|
+| `MGU/`, `MGU_prompted/` | Peripapillary (glaucoma) — 10 layers + disc | `serverless/pytorch/sam2-OCT-interactor/models/` | [enslinr/sam2-oct](https://huggingface.co/enslinr/sam2-oct) |
+| `NR206/` | Macular (healthy) — 8 layers | `serverless/pytorch/sam2-OCT-interactor/models/` | [enslinr/sam2-oct](https://huggingface.co/enslinr/sam2-oct) |
+| Base SAM2 (`sam2.1_hiera_base_plus.pt`) | Vanilla SAM2 (standard interactor) | `serverless/pytorch/sam2-interactor/models/` | [facebookresearch/sam2 releases](https://github.com/facebookresearch/sam2/releases) |
 
-The SAM2-OCT function reads its checkpoint path from the `SAM2_CHECKPOINT` environment variable (see `serverless/pytorch/sam2-OCT-interactor/function.yaml` and `docker-compose.override.yml`). OCT-specific behaviour is configured via `SAM2_NUM_CLASSES` and `SAM2_TARGET_CLASS` in your `.env` file.
+### Download the fine-tuned weights
+
+```bash
+pip install huggingface_hub
+python serverless/pytorch/sam2-OCT-interactor/download_models.py
+```
+
+This fetches all three fine-tuned checkpoints into `serverless/pytorch/sam2-OCT-interactor/models/`. To grab just one:
+
+```bash
+python -c "from huggingface_hub import hf_hub_download; hf_hub_download('enslinr/sam2-oct', 'MGU/final_runs_Glaucoma_last.pt', local_dir='serverless/pytorch/sam2-OCT-interactor/models')"
+```
+
+### Selecting a checkpoint
+
+The SAM2-OCT function loads the file named by the `SAM2_CHECKPOINT` environment variable (see `serverless/pytorch/sam2-OCT-interactor/function.yaml` and `docker-compose.override.yml`) — point it at the checkpoint you want to serve.
+
+> ⚠️ **The class count is currently fixed in code.** `model_handler.py` builds the model with `num_classes = 11` (10 peripapillary layers + background), matching the **MGU** checkpoints. To serve the **NR206** macular checkpoint (8 layers + background = 9 classes), change `num_classes` in [serverless/pytorch/sam2-OCT-interactor/model_handler.py](serverless/pytorch/sam2-OCT-interactor/model_handler.py) from `11` to `9`, otherwise the weights will fail to load with a shape mismatch.
 
 ## Custom features
 
