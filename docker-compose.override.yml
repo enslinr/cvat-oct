@@ -11,11 +11,8 @@ services:
       - ./serverless/pytorch/sam2-OCT-interactor/models:/opt/nuclio/sam2-oct/models:ro
       # initialization script
       - ./serverless/init-nuclio.sh:/docker-entrypoint-initdb.d/init-nuclio.sh:ro
-    environment:
-      - SAM2_CONFIG=sam2.1/sam2.1_hiera_b+.yaml
-      - SAM2_CHECKPOINT=/opt/nuclio/models/sam2.1_hiera_base_plus.pt
-      - SAM2_NUM_CLASSES=3        # adjust if your model exposes more channels
-      - SAM2_TARGET_CLASS=1       # which channel to use for CVAT masks
+    # Note: SAM2_* settings live in each function's function.yaml (the deployed
+    # functions do not inherit env from this dashboard container).
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8070"]
       interval: 10s
