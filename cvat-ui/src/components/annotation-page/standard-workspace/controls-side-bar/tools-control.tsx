@@ -1795,6 +1795,8 @@ export class ToolsControlComponent extends React.PureComponent<Props, State> {
         const minNegVertices = activeInteractor?.params?.canvas?.minNegVertices ?? -1;
         const renderStartWithBox = activeInteractor?.params?.canvas?.startWithBoxOptional ?? false;
         const renderGenerateWithoutPrompting = activeInteractor?.params?.canvas?.generateWithoutPromptingOptional ?? false;
+        // SAM2-OCT hides all interactor toggles and always generates masks without prompting by default.
+        const isSAM2OCT = activeInteractor?.name === 'SAM2-OCT';
 
         return (
             <>
@@ -1838,8 +1840,8 @@ export class ToolsControlComponent extends React.PureComponent<Props, State> {
                         </Popover>
                     </Col>
                 </Row>
-                <div className='cvat-tools-interactor-setups'>
-                    {activeInteractor?.name !== 'SAM2-OCT' && (
+                {!isSAM2OCT && (
+                    <div className='cvat-tools-interactor-setups'>
                         <div>
                             <Switch
                                 checked={convertMasksToPolygons}
@@ -1849,28 +1851,28 @@ export class ToolsControlComponent extends React.PureComponent<Props, State> {
                             />
                             <Text>Convert masks to polygons</Text>
                         </div>
-                    )}
 
-                    {renderStartWithBox && (
-                        <div>
-                            <Switch
-                                checked={startInteractingWithBox}
-                                onChange={(value: boolean) => this.setState({ startInteractingWithBox: value })}
-                            />
-                            <Text>Start with a bounding box</Text>
-                        </div>
-                    )}
+                        {renderStartWithBox && (
+                            <div>
+                                <Switch
+                                    checked={startInteractingWithBox}
+                                    onChange={(value: boolean) => this.setState({ startInteractingWithBox: value })}
+                                />
+                                <Text>Start with a bounding box</Text>
+                            </div>
+                        )}
 
-                    {renderGenerateWithoutPrompting && (
-                        <div>
-                            <Switch
-                                checked={generateWithoutPrompting}
-                                onChange={(checked: boolean) => this.setState({ generateWithoutPrompting: checked })}
-                            />
-                            <Text>Generate mask without prompting</Text>
-                        </div>
-                    )}
-                </div>
+                        {renderGenerateWithoutPrompting && (
+                            <div>
+                                <Switch
+                                    checked={generateWithoutPrompting}
+                                    onChange={(checked: boolean) => this.setState({ generateWithoutPrompting: checked })}
+                                />
+                                <Text>Generate mask without prompting</Text>
+                            </div>
+                        )}
+                    </div>
+                )}
                 <Row align='middle' justify='end'>
                     <Col>
                         <Button
@@ -1898,9 +1900,10 @@ export class ToolsControlComponent extends React.PureComponent<Props, State> {
                                     canvasInstance.interact({ shapeType: 'points', enabled: true, ...interactorParameters });
                                     onInteractionStart(activeInteractor, activeLabelID, interactorParameters);
 
-                                    if (generateWithoutPrompting) {
-                                        // Generate initial masks immediately, but keep interaction active for refinement
-                                        console.log('[SAM2-OCT] Generate without prompting enabled - creating initial masks');
+                                    if (generateWithoutPrompting || isSAM2OCT) {
+                                        // Generate initial masks immediately, but keep interaction active for refinement.
+                                        // SAM2-OCT always generates without prompting by default (toggle is hidden).
+                                        console.log('[SAM2-OCT] Generate without prompting - creating initial masks');
                                         this.triggerImmediateMaskGeneration();
                                     } else {
                                         console.log('[SAM2-OCT] Normal mode - waiting for user point prompts');
