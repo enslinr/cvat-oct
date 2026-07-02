@@ -8,8 +8,8 @@ message: >-
   Please also cite the upstream CVAT and SAM2 projects (see references).
 type: software
 authors:
-  - given-names: Roux
-    family-names: Enslin
+  - given-names: Enslin
+    family-names: Roux
     affiliation: University of the Witwatersrand
 repository-code: 'https://github.com/enslinr/cvat-oct'
 abstract: >-
