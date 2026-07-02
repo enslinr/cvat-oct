@@ -36,6 +36,9 @@ yarn-error.log*
 # Local dev scratch — never committed (notes, drafts, model cards, etc.)
 /scratchpad_no_commit/
 
+# Local Claude Code project instructions — not published
+/CLAUDE.local.md
+
 #Ignore Cypress tests temp files
 /tests/cypress/fixtures
 /tests/cypress/screenshots
